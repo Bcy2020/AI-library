@@ -199,12 +199,11 @@ static void build_data(NeuralNetwork& target,double gamma,DataBase& Base)
 int main()
 {
     DataBase data(0.8);
-    auto config = build_layers(104, 1, 4, 64);
-    config[2].out_size=64;
-    config[3].out_size=64;
-    config[4].function=Activition::Linear;
+    //auto config = build_net("DQN", 0.0001, build_layers(104, 1, 4, 64));
+    NetConfig config;
+    read_layeronfig_from_json("C:\\Users\\Lenovo\\Desktop\\AI project\\config.json", config);
     double rate=0.0005;
-    NeuralNetwork Q(config,rate, 64);
+    NeuralNetwork Q(config);
     Q.database(&data);
     for(int k=1;k<=10;k++)
     {

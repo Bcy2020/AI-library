@@ -8,15 +8,10 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "-fopenmp",
-                "-I\"C:/Program Files (x86)/Intel/oneAPI/mkl/latest/include\"",
+                "-I\"D:/C++_Library/json/include\"",
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}.exe",
-                "-L\"C:/Program Files (x86)/Intel/oneAPI/mkl/latest/lib/\"",
-                "-lmkl_intel_lp64",
-                "-lmkl_sequential",
-                "-lmkl_core"
             ],
             "options": {
                 "cwd": "${fileDirname}",

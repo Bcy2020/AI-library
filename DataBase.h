@@ -21,6 +21,7 @@ class DataBase
 	private:
 		vector<Data_pair> Datas;
 		double rate=0.8;
+		int pin;
 
 	public:
 		DataBase(double rating)
@@ -36,14 +37,15 @@ class DataBase
 			shuffle(Datas.begin(),Datas.end(),g);
 		}
 
-		Data_pair get_training_datas(std::mt19937& g,int num)
+		Data_pair* get_training_datas(std::mt19937& g,int num)
 		{
-			if(num==1)
+			int size=static_cast<int>(floor(Datas.size()*rate));
+			if (pin + num >= size)
 			{
-				int size=static_cast<int>(floor(Datas.size()*rate));
-				shuffle(Datas.begin(),Datas.begin()+size-1,g);
+				pin = 0;
+				shuffle(Datas.begin(), Datas.begin() + size - 1, g);
 			}
-			return Datas[num-1];
+			return Datas.data()+pin;
 		}
 
 		Data_pair get_testing_datas(std::mt19937& g)
@@ -56,6 +58,7 @@ class DataBase
 		void clear()
 		{
 			Datas.clear();
+			pin = 0;
 		}
 };
 

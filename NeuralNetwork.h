@@ -32,19 +32,20 @@ class NeuralNetwork:public Base_Network
 		Lossfun_pair loss_function;
 		DataBase* datas;
 		int batch_size;
+		string ID;
 
 	public:
 		NeuralNetwork()=default;
 
-		NeuralNetwork(Config_Vector config,double learn_rt,double batch=1,DataBase* Datas=NULL,Lossfun_pair lossfun=Loss_function::MSE)
-			:net_size(config.size()-1),learn_rate(learn_rt),batch_size(batch),datas(Datas),loss_function(lossfun)
+		NeuralNetwork(NetConfig config,DataBase* Datas=NULL,Lossfun_pair lossfun=Loss_function::MSE)
+			:net_size(config.layers.size()-1),ID(config.ID),learn_rate(config.learning_rate),batch_size(config.batch),datas(Datas),loss_function(lossfun)
 		{
 			assert(net_size>0 && "Must larger than 1 layer!");
-			layers.emplace_back(make_unique<Layer>(1, config[0].out_size));
+			layers.emplace_back(make_unique<Layer>(1, config.layers[0].out_size));
 			for (int i = 1; i <= net_size; i++)
 			{
-				if (config[i].ID == "FCL")layers.emplace_back(make_unique<Layer>(config[i - 1].out_size,
-					config[i].out_size, config[i].function, config[i].restriction));
+				if (config.layers[i].ID == "FCL")layers.emplace_back(make_unique<Layer>(config.layers[i - 1].out_size,
+					config.layers[i].out_size, config.layers[i].function, config.layers[i].restriction));
 			}
 		}
 	
@@ -76,12 +77,13 @@ class NeuralNetwork:public Base_Network
 			mt19937 g(rd());
 			for(int i=1;i<=times;i++)
 			{
+				Data_pair* tmp = datas->get_training_datas(g, batch_size);
 				for(int j=1;j<=batch_size;j++)
 				{
-					Data_pair tmp=datas->get_training_datas(g,j);
-					VectorXd out=push_forward(tmp.input);
-					backprop(out,tmp.target);
-					ret+=loss_function.loss(out,tmp.target);
+					VectorXd out=push_forward(tmp->input);
+					backprop(out,tmp->target);
+					ret+=loss_function.loss(out,tmp->target);
+					tmp++;
 				}
 				for(int k=net_size;k>=1;k--) layers[k]->update(learn_rate);
 			}
@@ -137,7 +139,6 @@ class NeuralNetwork:public Base_Network
 			layers[0]->outsize(layers[1]->insize());
     		static_cast<Layer*>(layers[0].get())->change_outs(VectorXd::Zero(layers[1]->insize()));
 		}
-
 		void database(DataBase* data){datas=data;}
 		void learning_rate(double rate)override{learn_rate=rate;}
 };

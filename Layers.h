@@ -10,6 +10,7 @@
 #include <map>
 #include "function_namespace.h"
 #include "EigenIO.h"
+#include "Config.h"
 
 using namespace std;
 using namespace Eigen;
@@ -34,50 +35,6 @@ void random_init(MatrixBase<eig>& mat,typename eig::Scalar Min=-1.0,typename eig
 	}
 }*/
 
-using grad_restriction_function=function<void(VectorXd&)>;
-namespace grad_restriction
-{
-	inline void empty(VectorXd& delta){}
-
-	inline void cropping(VectorXd& delta,double threshold)
-	{
-		double norm=delta.norm();
-		if(norm>threshold)delta*=(threshold/norm);
-	}
-
-	inline grad_restriction_function make_cropping_function(double threshold)
-	{
-		return [threshold](VectorXd& delta){cropping(delta,threshold);};
-	}
-}
-
-struct LayerConfig
-{
-	string ID;
-	int out_size;
-	Actfun_pair function;
-	grad_restriction_function restriction=grad_restriction::empty;
-};
-typedef vector<LayerConfig> Config_Vector;
-
-Config_Vector build_layers(int input_size, int output_size, int net_size,int layer_size)
-{
-    assert(net_size > 0 && "Must have at least 1 hidden layer!");
-    Config_Vector config(net_size+1);
-    config[0].out_size=input_size;
-    config[0].function=Activition::Sigmoid;
-	config[0].ID = "FCL";
-    for (int i=1;i<net_size;i++)
-    {
-		config[i].ID = "FCL";
-        config[i].out_size=layer_size;
-        config[i].function=Activition::ReLU;
-    }
-    config[net_size].out_size=output_size;
-    config[net_size].function=Activition::Sigmoid;
-	config[net_size].ID = "FCL";
-    return config;
-}
 
 class Base_Layer
 {

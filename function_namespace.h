@@ -38,6 +38,19 @@ namespace Activition
 	inline VectorXd relu_derivative(const VectorXd& inp)
 		{return (inp.array()>0.0).cast<double>(); }
 	const Actfun_pair ReLU={relu,relu_derivative,"ReLU"};
+
+	inline VectorXd softmax(const VectorXd& inp)
+	{
+		VectorXd exp = (inp.array() - inp.maxCoeff()).exp();
+		return exp / exp.sum();
+	}
+	inline VectorXd softmax_derivative(const VectorXd& inp)
+	{
+		VectorXd tmp = softmax(inp);
+		MatrixXd ret = tmp.asDiagonal().toDenseMatrix() - tmp * tmp.transpose();
+		return ret.diagonal();
+	}
+	const Actfun_pair Softmax = { softmax,softmax_derivative,"Softmax" };
 }
 
 namespace
@@ -49,6 +62,7 @@ namespace
 			actfun_map["Sigmoid"]=Activition::Sigmoid;
 			actfun_map["ReLU"]=Activition::ReLU;
 			actfun_map["Linear"]=Activition::Linear;
+			actfun_map["Softmax"] = Activition::Softmax;
 		}
 	};
 	ActfunInitializer Actfun_Initializer;
@@ -82,6 +96,11 @@ namespace Loss_function
 	    return -(target.array()*(output.array()+eps).log()+ 
 	            (1-target.array())*(1-output.array()+eps).log()).mean();
     }
+	inline VectorXd cross_entropy_derivative(const VectorXd& output, const VectorXd& target)
+	{
+		return output - target;
+	}
+	Lossfun_pair CRE = { cross_entropy,cross_entropy_derivative,"CRE" };
 }
 namespace
 {
@@ -89,10 +108,28 @@ namespace
 	{
 		LossfunInitializer()
 		{
-			lossfun_map["MSE"]=Loss_function::MSE;
+			lossfun_map["MSE"] = Loss_function::MSE;
+			lossfun_map["CRE"] = Loss_function::CRE;
 		}
 	};
 	LossfunInitializer Lossfun_Initializer;
+}
+
+using grad_restriction_function = function<void(VectorXd&)>;
+namespace grad_restriction
+{
+	inline void empty(VectorXd& delta) {}
+
+	inline void cropping(VectorXd& delta, double threshold)
+	{
+		double norm = delta.norm();
+		if (norm > threshold)delta *= (threshold / norm);
+	}
+
+	inline grad_restriction_function make_cropping_function(double threshold)
+	{
+		return [threshold](VectorXd& delta) {cropping(delta, threshold); };
+	}
 }
 
 #endif
