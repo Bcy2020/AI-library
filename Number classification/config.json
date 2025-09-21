@@ -1,0 +1,33 @@
+{
+  "ID": "Numbers",
+  "input_size": 784,
+  "output_size": 10,
+  "learning_rate": 0.005,
+  "batch": 32,
+  "layers": [
+    {
+      "ID": "FCL",
+      "output_size": 784,
+      "activition": "ReLU",
+      "restriction": "empty"
+    },
+    {
+      "ID": "FCL",
+      "output_size": 1000,
+      "activition": "ReLU",
+      "restriction": "empty"
+    },
+    {
+      "ID": "FCL",
+      "output_size": 100,
+      "activition": "Sigmoid",
+      "restriction": "empty"
+    },
+    {
+      "ID": "FCL",
+      "output_size": 10,
+      "activition": "Softmax",
+      "restriction": "empty"
+    }
+  ]
+}

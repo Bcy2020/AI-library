@@ -80,6 +80,7 @@ class NeuralNetwork:public Base_Network
 				Data_pair* tmp = datas->get_training_datas(g, batch_size);
 				for(int j=1;j<=batch_size;j++)
 				{
+					tmp->input;
 					VectorXd out=push_forward(tmp->input);
 					backprop(out,tmp->target);
 					ret+=loss_function.loss(out,tmp->target);

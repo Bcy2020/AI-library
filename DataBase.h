@@ -19,11 +19,12 @@ struct Data_pair
 class DataBase
 {
 	private:
-		vector<Data_pair> Datas;
 		double rate=0.8;
 		int pin;
 
 	public:
+		vector<Data_pair> Datas;
+
 		DataBase(double rating)
 			:rate(rating){}
 
@@ -45,6 +46,7 @@ class DataBase
 				pin = 0;
 				shuffle(Datas.begin(), Datas.begin() + size - 1, g);
 			}
+			pin += num;
 			return Datas.data()+pin;
 		}
 
