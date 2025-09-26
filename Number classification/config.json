@@ -7,13 +7,13 @@
   "layers": [
     {
       "ID": "FCL",
-      "output_size": 784,
+      "output_size": 700,
       "activition": "ReLU",
       "restriction": "empty"
     },
     {
       "ID": "FCL",
-      "output_size": 1000,
+      "output_size": 500,
       "activition": "ReLU",
       "restriction": "empty"
     },

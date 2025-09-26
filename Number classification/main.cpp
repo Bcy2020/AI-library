@@ -1,3 +1,4 @@
+#include <omp.h>
 #include "DataBase.h"
 #include<NeuralNetwork.h>
 #include <fstream>
@@ -163,6 +164,7 @@ void print_dataset_info(DataBase& train_db, DataBase& test_db) {
 }
 
 int main() {
+    omp_set_num_threads(16);
     // 数据集路径
     const std::string data_path = "C:\\Users\\Lenovo\\Desktop\\AI project\\Number classification\\";
 
@@ -182,10 +184,13 @@ int main() {
         NetConfig tmp;
         read_layeronfig_from_json(file_config, tmp);
         NeuralNetwork net(tmp, &train_db, Loss_function::CRE);
+        double rate = 0.005;
         for (int i = 1; i <= 100; i++)
         {
             cout << net.test(100)<<" "<<net.training(10)<<endl;
             if (i % 10 == 0)net.model_export("C:\\Users\\Lenovo\\Desktop\\AI project\\Number classification\\model.txt");
+            rate *= 0.997;
+            net.learning_rate(rate);
         }
         print_dataset_info(train_db, test_db);
     }

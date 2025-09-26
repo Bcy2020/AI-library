@@ -26,7 +26,7 @@ class DataBase
 		vector<Data_pair> Datas;
 
 		DataBase(double rating)
-			:rate(rating){}
+			:rate(rating),pin(0){}
 
 		void push_back(const Data_pair& input){Datas.push_back(input);}
 		int size(){return Datas.size();}
