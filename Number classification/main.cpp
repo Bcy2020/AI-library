@@ -1,21 +1,21 @@
 #include <omp.h>
-#include "DataBase.h"
-#include<NeuralNetwork.h>
+#include "../DataBase.h"
+#include"../NeuralNetwork.h"
 #include <fstream>
 #include <vector>
 #include <stdexcept>
 #include <cstdint>
 
-// ÀàÐÍ¶¨Òå£ºÓÃÓÚ¶ÁÈ¡ÎÄ¼þÍ·µÄ32Î»ÎÞ·ûºÅÕûÊý
+// ï¿½ï¿½ï¿½Í¶ï¿½ï¿½å£ºï¿½ï¿½ï¿½Ú¶ï¿½È¡ï¿½Ä¼ï¿½Í·ï¿½ï¿½32Î»ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 using uchar = unsigned char;
 using uint32 = uint32_t;
 
-// ¶ÁÈ¡MNISTÎÄ¼þÖÐµÄ32Î»ÕûÊý£¨MNISTÊ¹ÓÃ´ó¶Ë×Ö½ÚÐò£©
+// ï¿½ï¿½È¡MNISTï¿½Ä¼ï¿½ï¿½Ðµï¿½32Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½MNISTÊ¹ï¿½Ã´ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
 uint32 read_uint32(std::ifstream& file) {
     uint32 result;
     uchar bytes[4];
     file.read(reinterpret_cast<char*>(bytes), 4);
-    // ×ª»»´ó¶Ë×Ö½ÚÐòµ½±¾µØ×Ö½ÚÐò
+    // ×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½ï¿½òµ½±ï¿½ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
     result = (static_cast<uint32>(bytes[0]) << 24) |
         (static_cast<uint32>(bytes[1]) << 16) |
         (static_cast<uint32>(bytes[2]) << 8) |
@@ -23,33 +23,33 @@ uint32 read_uint32(std::ifstream& file) {
     return result;
 }
 
-// ¼ÓÔØÍ¼ÏñÎÄ¼þµ½Êý¾Ý¿â
+// ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½
 bool load_images(const std::string& filename, DataBase& db, int label_count) {
     std::ifstream file(filename, std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "ÎÞ·¨´ò¿ªÍ¼ÏñÎÄ¼þ: " << filename << std::endl;
+        std::cerr << "ï¿½Þ·ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ä¼ï¿½: " << filename << std::endl;
         return false;
     }
 
-    // ¶ÁÈ¡Í¼ÏñÎÄ¼þÍ·
+    // ï¿½ï¿½È¡Í¼ï¿½ï¿½ï¿½Ä¼ï¿½Í·
     uint32 magic = read_uint32(file);
     uint32 count = read_uint32(file);
     uint32 rows = read_uint32(file);
     uint32 cols = read_uint32(file);
 
-    // ÑéÖ¤MNISTÍ¼ÏñÎÄ¼þÄ§Êý
+    // ï¿½ï¿½Ö¤MNISTÍ¼ï¿½ï¿½ï¿½Ä¼ï¿½Ä§ï¿½ï¿½
     if (magic != 2051) {
-        std::cerr << "ÎÞÐ§µÄÍ¼ÏñÎÄ¼þÄ§Êý: " << magic << std::endl;
+        std::cerr << "ï¿½ï¿½Ð§ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ä¼ï¿½Ä§ï¿½ï¿½: " << magic << std::endl;
         return false;
     }
 
-    // ¼ì²éÍ¼ÏñÊýÁ¿Óë±êÇ©ÊýÁ¿ÊÇ·ñÆ¥Åä
+    // ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç©ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½Æ¥ï¿½ï¿½
     if (count != static_cast<uint32>(label_count)) {
-        std::cerr << "Í¼ÏñÊýÁ¿Óë±êÇ©ÊýÁ¿²»Æ¥Åä" << std::endl;
+        std::cerr << "Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¥ï¿½ï¿½" << std::endl;
         return false;
     }
 
-    // ¶ÁÈ¡Í¼ÏñÊý¾Ý²¢Ìí¼Óµ½Êý¾Ý¿â
+    // ï¿½ï¿½È¡Í¼ï¿½ï¿½ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½Ý¿ï¿½
     const int pixel_count = rows * cols;
     std::vector<uchar> buffer(pixel_count);
 
@@ -58,7 +58,7 @@ bool load_images(const std::string& filename, DataBase& db, int label_count) {
 
         Data_pair data;
         data.input = VectorXd(pixel_count);
-        // ÏñËØÖµ¹éÒ»»¯µ½[0, 1]
+        // ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½[0, 1]
         for (int j = 0; j < pixel_count; ++j) {
             data.input[j] = static_cast<double>(buffer[j]) / 255.0;
         }
@@ -66,119 +66,119 @@ bool load_images(const std::string& filename, DataBase& db, int label_count) {
         db.push_back(data);
     }
 
-    std::cout << "³É¹¦¼ÓÔØ " << count << " ÕÅÍ¼Ïñ (" << rows << "x" << cols << ")" << std::endl;
+    std::cout << "ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½ " << count << " ï¿½ï¿½Í¼ï¿½ï¿½ (" << rows << "x" << cols << ")" << std::endl;
     return true;
 }
 
-// ¼ÓÔØ±êÇ©ÎÄ¼þ²¢Æ¥Åäµ½Êý¾Ý¿â
+// ï¿½ï¿½ï¿½Ø±ï¿½Ç©ï¿½Ä¼ï¿½ï¿½ï¿½Æ¥ï¿½äµ½ï¿½ï¿½ï¿½Ý¿ï¿½
 bool load_labels(const std::string& filename, DataBase& db) {
     std::ifstream file(filename, std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "ÎÞ·¨´ò¿ª±êÇ©ÎÄ¼þ: " << filename << std::endl;
+        std::cerr << "ï¿½Þ·ï¿½ï¿½ò¿ª±ï¿½Ç©ï¿½Ä¼ï¿½: " << filename << std::endl;
         return false;
     }
 
-    // ¶ÁÈ¡±êÇ©ÎÄ¼þÍ·
+    // ï¿½ï¿½È¡ï¿½ï¿½Ç©ï¿½Ä¼ï¿½Í·
     uint32 magic = read_uint32(file);
     uint32 count = read_uint32(file);
 
-    // ÑéÖ¤MNIST±êÇ©ÎÄ¼þÄ§Êý
+    // ï¿½ï¿½Ö¤MNISTï¿½ï¿½Ç©ï¿½Ä¼ï¿½Ä§ï¿½ï¿½
     if (magic != 2049) {
-        std::cerr << "ÎÞÐ§µÄ±êÇ©ÎÄ¼þÄ§Êý: " << magic << std::endl;
+        std::cerr << "ï¿½ï¿½Ð§ï¿½Ä±ï¿½Ç©ï¿½Ä¼ï¿½Ä§ï¿½ï¿½: " << magic << std::endl;
         return false;
     }
 
-    // ¼ì²é±êÇ©ÊýÁ¿ÓëÊý¾Ý¿â´óÐ¡ÊÇ·ñÆ¥Åä
+    // ï¿½ï¿½ï¿½ï¿½Ç©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½Ð¡ï¿½Ç·ï¿½Æ¥ï¿½ï¿½
     if (count != static_cast<uint32>(db.size())) {
-        std::cerr << "±êÇ©ÊýÁ¿ÓëÍ¼ÏñÊýÁ¿²»Æ¥Åä" << std::endl;
+        std::cerr << "ï¿½ï¿½Ç©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¥ï¿½ï¿½" << std::endl;
         return false;
     }
 
-    // ¶ÁÈ¡±êÇ©Êý¾Ý²¢ÉèÖÃµ½Êý¾Ý¿â
+    // ï¿½ï¿½È¡ï¿½ï¿½Ç©ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½Ý¿ï¿½
     for (uint32 i = 0; i < count; ++i) {
         uchar label;
         file.read(reinterpret_cast<char*>(&label), 1);
 
-        // Ê¹ÓÃ¶ÀÈÈ±àÂë±íÊ¾±êÇ©£¨0-9¹²10¸öÀà±ð£©
+        // Ê¹ï¿½Ã¶ï¿½ï¿½È±ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½Ç©ï¿½ï¿½0-9ï¿½ï¿½10ï¿½ï¿½ï¿½ï¿½ï¿½
         db.Datas[i].target = VectorXd::Zero(10);
         db.Datas[i].target[label] = 1.0;
     }
 
-    std::cout << "³É¹¦¼ÓÔØ " << count << " ¸ö±êÇ©" << std::endl;
+    std::cout << "ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½ " << count << " ï¿½ï¿½ï¿½ï¿½Ç©" << std::endl;
     return true;
 }
 
-// ¼ÓÔØÑµÁ·¼¯Êý¾Ý
+// ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 bool load_training_set(DataBase& train_db, const std::string& base_path) {
     std::string img_path = base_path + "train-images.idx3-ubyte";
     std::string lbl_path = base_path + "train-labels.idx1-ubyte";
 
-    // ÏÈ¶ÁÈ¡±êÇ©»ñÈ¡ÊýÁ¿£¨ÓÃÓÚÑéÖ¤Í¼ÏñÊýÁ¿£©
+    // ï¿½È¶ï¿½È¡ï¿½ï¿½Ç©ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     std::ifstream lbl_file(lbl_path, std::ios::binary);
     if (!lbl_file.is_open()) {
-        std::cerr << "ÎÞ·¨´ò¿ªÑµÁ·±êÇ©ÎÄ¼þ: " << lbl_path << std::endl;
+        std::cerr << "ï¿½Þ·ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½Ç©ï¿½Ä¼ï¿½: " << lbl_path << std::endl;
         return false;
     }
-    read_uint32(lbl_file); // Ìø¹ýÄ§Êý
+    read_uint32(lbl_file); // ï¿½ï¿½ï¿½ï¿½Ä§ï¿½ï¿½
     uint32 train_count = read_uint32(lbl_file);
     lbl_file.close();
 
-    // ¼ÓÔØÍ¼ÏñºÍ±êÇ©
+    // ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½Í±ï¿½Ç©
     if (!load_images(img_path, train_db, train_count)) return false;
     if (!load_labels(lbl_path, train_db)) return false;
 
     return true;
 }
 
-// ¼ÓÔØ²âÊÔ¼¯Êý¾Ý
+// ï¿½ï¿½ï¿½Ø²ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½
 bool load_test_set(DataBase& test_db, const std::string& base_path) {
     std::string img_path = base_path + "t10k-images.idx3-ubyte";
     std::string lbl_path = base_path + "t10k-labels.idx1-ubyte";
 
-    // ÏÈ¶ÁÈ¡±êÇ©»ñÈ¡ÊýÁ¿
+    // ï¿½È¶ï¿½È¡ï¿½ï¿½Ç©ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
     std::ifstream lbl_file(lbl_path, std::ios::binary);
     if (!lbl_file.is_open()) {
-        std::cerr << "ÎÞ·¨´ò¿ª²âÊÔ±êÇ©ÎÄ¼þ: " << lbl_path << std::endl;
+        std::cerr << "ï¿½Þ·ï¿½ï¿½ò¿ª²ï¿½ï¿½Ô±ï¿½Ç©ï¿½Ä¼ï¿½: " << lbl_path << std::endl;
         return false;
     }
-    read_uint32(lbl_file); // Ìø¹ýÄ§Êý
+    read_uint32(lbl_file); // ï¿½ï¿½ï¿½ï¿½Ä§ï¿½ï¿½
     uint32 test_count = read_uint32(lbl_file);
     lbl_file.close();
 
-    // ¼ÓÔØÍ¼ÏñºÍ±êÇ©
+    // ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½Í±ï¿½Ç©
     if (!load_images(img_path, test_db, test_count)) return false;
     if (!load_labels(lbl_path, test_db)) return false;
 
     return true;
 }
 
-// ÏÔÊ¾Êý¾Ý¼¯»ù±¾ÐÅÏ¢
+// ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 void print_dataset_info(DataBase& train_db, DataBase& test_db) {
-    std::cout << "\nÊý¾Ý¼¯ÐÅÏ¢:" << std::endl;
-    std::cout << "ÑµÁ·¼¯´óÐ¡: " << train_db.size() << std::endl;
-    std::cout << "²âÊÔ¼¯´óÐ¡: " << test_db.size() << std::endl;
+    std::cout << "\nï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½Ï¢:" << std::endl;
+    std::cout << "Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡: " << train_db.size() << std::endl;
+    std::cout << "ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½Ð¡: " << test_db.size() << std::endl;
     if (train_db.size() > 0) {
-        std::cout << "ÊäÈëÎ¬¶È: " << train_db.Datas[0].input.size() << std::endl;
-        std::cout << "Êä³öÎ¬¶È: " << train_db.Datas[0].target.size() << std::endl;
+        std::cout << "ï¿½ï¿½ï¿½ï¿½Î¬ï¿½ï¿½: " << train_db.Datas[0].input.size() << std::endl;
+        std::cout << "ï¿½ï¿½ï¿½Î¬ï¿½ï¿½: " << train_db.Datas[0].target.size() << std::endl;
     }
 }
 
 int main() {
     omp_set_num_threads(16);
-    // Êý¾Ý¼¯Â·¾¶
+    // ï¿½ï¿½ï¿½Ý¼ï¿½Â·ï¿½ï¿½
     const std::string data_path = "C:\\Users\\Lenovo\\Desktop\\AI project\\Number classification\\";
 
-    // ³õÊ¼»¯Êý¾Ý¿â£¨ÑµÁ·¼¯±ÈÀý80%£¬½ö¶ÔÑµÁ·¼¯Êý¾Ý¿âÓÐÐ§£©
+    // ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿â£¨Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½80%ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
     DataBase train_db(0.8);
-    DataBase test_db(1.0);  // ²âÊÔ¼¯²»»®·Ö£¬È«²¿ÓÃÓÚ²âÊÔ
+    DataBase test_db(1.0);  // ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½
 
     try {
-        // ¼ÓÔØÊý¾Ý¼¯
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¼ï¿½
         if (!load_training_set(train_db, data_path)) {
-            throw std::runtime_error("ÑµÁ·¼¯¼ÓÔØÊ§°Ü");
+            throw std::runtime_error("Ñµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½");
         }
         if (!load_test_set(test_db, data_path)) {
-            throw std::runtime_error("²âÊÔ¼¯¼ÓÔØÊ§°Ü");
+            throw std::runtime_error("ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½");
         }
         string file_config = "C:\\Users\\Lenovo\\Desktop\\AI project\\Number classification\\config.json";
         NetConfig tmp;
@@ -195,14 +195,14 @@ int main() {
         print_dataset_info(train_db, test_db);
     }
     catch (const std::exception& e) {
-        std::cerr << "´íÎó: " << e.what() << std::endl;
+        std::cerr << "ï¿½ï¿½ï¿½ï¿½: " << e.what() << std::endl;
         return -1;
     }
 
-    // ÇåÀí×ÊÔ´
+    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´
     train_db.clear();
     test_db.clear();
-    std::cout << "\n³ÌÐòÖ´ÐÐÍê±Ï" << std::endl;
+    std::cout << "\nï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½" << std::endl;
 
     return 0;
 }

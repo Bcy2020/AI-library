@@ -1,8 +1,6 @@
 #ifndef LAYERS_H
 #define LAYERS_H
 
-#define EIGEN_USE_MKL_ALL
-#define EIGEN_USE_OPENMP
 #include <Eigen/Dense>
 #include <iostream>
 #include <type_traits>

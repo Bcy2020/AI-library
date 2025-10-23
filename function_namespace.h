@@ -1,8 +1,6 @@
 #ifndef FUNCTION_NAMESPACE_H
 #define FUNCTION_NAMESPACE_H
 
-#define EIGEN_USE_MKL_ALL
-#define EIGEN_USE_OPENMP
 #include <Eigen/Dense>
 #include <iostream>
 #include <map>

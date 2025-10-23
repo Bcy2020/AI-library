@@ -1,7 +1,7 @@
 #include<iostream>
 #include"function_namespace.h"
 #include<vector>
-#include <nlohmann/json.hpp>
+#include<nlohmann/json.hpp>
 #include <fstream>
 using namespace std;
 using json = nlohmann::json;
